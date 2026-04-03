@@ -13,12 +13,19 @@ def load_and_prepare_data(file_path='汇总.xlsx'):
     thermal_df = pd.read_excel(file_path, sheet_name='负载24', index_col=0)
 
     # 尝试转换索引为 datetime 类型，以方便提取时间特征
+    def safe_to_datetime(idx):
+        if pd.api.types.is_numeric_dtype(idx):
+            # 假设是 Excel 的日期序列号
+            return pd.to_datetime(idx, unit='D', origin='1899-12-30')
+        else:
+            return pd.to_datetime(idx)
+
     try:
-        price_df.index = pd.to_datetime(price_df.index)
-        wind_df.index = pd.to_datetime(wind_df.index)
-        pv_df.index = pd.to_datetime(pv_df.index)
-        load_df.index = pd.to_datetime(load_df.index)
-        thermal_df.index = pd.to_datetime(thermal_df.index)
+        price_df.index = safe_to_datetime(price_df.index)
+        wind_df.index = safe_to_datetime(wind_df.index)
+        pv_df.index = safe_to_datetime(pv_df.index)
+        load_df.index = safe_to_datetime(load_df.index)
+        thermal_df.index = safe_to_datetime(thermal_df.index)
     except Exception as e:
         print("时间索引转换失败，部分时间周期特征可能受影响:", e)
 
